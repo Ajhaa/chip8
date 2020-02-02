@@ -1,18 +1,21 @@
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
 pub struct Chip {
     opcode: u16,
 
-    pub memory: [u8; 4096],
-    pub V: [u8; 16],
+    memory: [u8; 4096],
+    V: [u8; 16],
 
     pub I: u16,
     pub pc: usize,
 
-    pub gfx: [u8; 64*32],
+    gfx: [bool; 64*32],
 
     delay_timer: u8,
     sound_timer: u8,
 
-    pub stack: [u16; 16],
+    stack: [u16; 16],
     pub sp: usize,
 }
 
@@ -31,7 +34,7 @@ impl Chip {
             V: [0; 16],
             I: 0,
             pc: 0x200,
-            gfx: [0; 64*32],
+            gfx: [false; 64*32],
             delay_timer: 0,
             sound_timer: 0,
             stack: [0; 16],
@@ -80,7 +83,7 @@ impl Chip {
                 match opcode & 0x000F {
                     // CLS
                     0x0000 => {
-                        self.gfx = [0; 64*32]
+                        self.gfx = [false; 64*32]
                     },
                     // RET
                     0x000E => {
