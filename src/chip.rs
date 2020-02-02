@@ -58,16 +58,19 @@ impl Chip {
     pub fn reg_dump(&self) {
         let mut i = 0;
         for reg in &self.V {
-            println!("V{}: {}", i, reg);
+            //println!("V{}: {}", i, reg);
             i += 1;
         }
     }
 
-    pub fn mem_dump(&self, start: usize, end: usize) {
+    pub fn mem_dump(&self, start: usize, end: usize) -> Vec<String> {
+        let mut dump = vec![];
         for i in start..end {
             let val = self.memory[i];
-            println!("{:X}: 0x{:X} {}", i, val, val);
+            dump.push(format!("{:X}: 0x{:X} {}", i, val, val));
         }
+
+        dump
     }
 
     pub fn cycle(&mut self) {
@@ -85,7 +88,7 @@ impl Chip {
                         self.sp -= 1;
                         return;
                     },
-                    _ => println!("unknown opcode {}", opcode)
+                    _ => ()
                 }
             },
             // JP addr
@@ -241,7 +244,7 @@ impl Chip {
                     _ => ()
                 }
             },
-            _ => println!("unknown opcode {}", opcode)
+            _ => ()
         }
 
         self.pc += 2;
