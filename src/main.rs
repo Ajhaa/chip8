@@ -1,9 +1,8 @@
 mod chip;
 
 use chip::Chip;
-use std::io;
 
-fn main() -> io::Result<()> {
+fn main() {
     let mut system = Chip::new();
 
     let fibonacci = vec![
@@ -39,8 +38,6 @@ fn main() -> io::Result<()> {
     
     system.mem_dump(0x400, 0x40A);
     system.reg_dump();
-
-    Ok(())
 }
 
 
