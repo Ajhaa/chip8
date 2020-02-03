@@ -1,4 +1,6 @@
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsValue;
+use js_sys::Array;
 
 #[wasm_bindgen]
 pub struct Chip {
@@ -26,6 +28,7 @@ fn extract_reg_and_byte(opcode: u16) -> (usize, u8) {
     return (reg as usize, value as u8);
 }
 
+#[wasm_bindgen]
 impl Chip {
     pub fn new() -> Chip {
         Chip {
@@ -42,6 +45,39 @@ impl Chip {
         }
     }
 
+    pub fn display_as_str(&self) -> String {
+        let mut display_str = String::new();
+        
+        for i in 0..2048 {
+            if i % 64 == 0 {
+                display_str.push('\n');
+            }
+            let pixel = self.gfx[i];
+            display_str.push(if pixel { 'X' } else { '=' });
+        }
+        
+        display_str
+    }
+
+
+
+    pub fn trigger_cycle(&mut self) {
+        self.cycle();
+    }
+
+    pub fn mem_dump(&self, start: usize, end: usize) -> Array {
+        let dump = Array::new();
+        for i in start..end {
+            let val = self.memory[i];
+            dump.push(&JsValue::from_str(&format!("{:X}: 0x{:X} {}", i, val, val)));
+        }
+
+        dump
+    }
+}
+
+
+impl Chip {
     pub fn get_opcode(&self) -> u16 {
         let code = self.memory[self.pc] as u16;
         code << 8 | self.memory[self.pc + 1] as u16
@@ -64,30 +100,6 @@ impl Chip {
             //println!("V{}: {}", i, reg);
             i += 1;
         }
-    }
-
-    pub fn mem_dump(&self, start: usize, end: usize) -> Vec<String> {
-        let mut dump = vec![];
-        for i in start..end {
-            let val = self.memory[i];
-            dump.push(format!("{:X}: 0x{:X} {}", i, val, val));
-        }
-
-        dump
-    }
-
-    pub fn display_as_str(&self) -> String {
-        let mut display_str = String::new();
-        
-        for i in 0..2048 {
-            if i % 64 == 0 {
-                display_str.push('\n');
-            }
-            let pixel = self.gfx[i];
-            display_str.push(if pixel { 'X' } else { '=' });
-        }
-        
-        display_str
     }
 
     pub fn cycle(&mut self) {
