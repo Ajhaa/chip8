@@ -44,11 +44,11 @@ pub fn chip_test() {
     ];
 
 
-    system.load_instructions(&fibonacci);
+    // system.load_instructions(&fibonacci);
     
-    while system.pc - 0x200 < fibonacci.len() * 2 {
-        system.cycle();
-    }
+    // while system.pc - 0x200 < fibonacci.len() * 2 {
+    //     system.cycle();
+    // }
 
     // log("Memory:");
     // for mem in system.mem_dump(0x400, 0x40A) {

@@ -59,7 +59,17 @@ impl Chip {
         display_str
     }
 
-
+    pub fn load_instructions(&mut self, list: Array) {
+        let mut i = 0x200;
+        for inst in list.iter() {
+            let number = inst.as_f64().unwrap() as u16;
+            let p1 = (number & 0xFF00) >> 8;
+            let p2 = number & 0x00FF;  
+            self.memory[i] = p1 as u8;
+            self.memory[i+1] = p2 as u8;
+            i += 2;
+        }
+    }
 
     pub fn trigger_cycle(&mut self) {
         self.cycle();
@@ -81,17 +91,6 @@ impl Chip {
     pub fn get_opcode(&self) -> u16 {
         let code = self.memory[self.pc] as u16;
         code << 8 | self.memory[self.pc + 1] as u16
-    }
-
-    pub fn load_instructions(&mut self, list: &Vec<u16>) {
-        let mut i = 0x200;
-        for inst in list {
-            let p1 = (inst & 0xFF00) >> 8;
-            let p2 = inst & 0x00FF;  
-            self.memory[i] = p1 as u8;
-            self.memory[i+1] = p2 as u8;
-            i += 2;
-        }
     }
 
     pub fn reg_dump(&self) {
