@@ -76,6 +76,20 @@ impl Chip {
         dump
     }
 
+    pub fn display_as_str(&self) -> String {
+        let mut display_str = String::new();
+        
+        for i in 0..2048 {
+            if i % 64 == 0 {
+                display_str.push('\n');
+            }
+            let pixel = self.gfx[i];
+            display_str.push(if pixel { 'X' } else { '=' });
+        }
+        
+        display_str
+    }
+
     pub fn cycle(&mut self) {
         let opcode = self.get_opcode();
         match opcode & 0xF000 {

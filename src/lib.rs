@@ -18,6 +18,17 @@ extern {
 }
 
 #[wasm_bindgen]
+impl Chip {
+    pub fn get_display_string(&self) -> String {
+        self.display_as_str()
+    }
+
+    pub fn create() -> Chip {
+        Chip::new()
+    }
+}
+
+#[wasm_bindgen]
 pub fn chip_test() {
     let mut system = Chip::new();
     let fibonacci = vec![
