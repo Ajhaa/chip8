@@ -32,12 +32,20 @@ let picture = [
   0x6101, // load second part of sprite to register 1
   0xF155, // load registers 0 and 1 into memory at memory pointer
   0xD232, // display 2 byte sprite at coordinates V2, V3
+];
+
+let letter = [
+  0x620F, // load x coordinate to register 2
+  0x6302, // load y coordinate to register 3
+  0x6007, // Load value 0x0A to register 0
+  0xF029, // Move I to digit pointed by register 0
+  0xD235, // display 5 byte sprite at coordinates V2, V3
 ]
 
 let chip = wasm.Chip.new();
-chip.load_instructions(picture)
+chip.load_instructions(letter)
 
-while (chip.pc - 0x200 < picture.length * 2) {
+while (chip.pc - 0x200 < letter.length * 2) {
   chip.trigger_cycle();
 }
 

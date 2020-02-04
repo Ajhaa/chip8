@@ -291,6 +291,14 @@ impl Chip {
                         self.I += self.V[reg] as u16;
 
                     },
+                    0x0029 => {
+                        let reg = ((opcode & 0x0F00) >> 8) as usize;
+                        let digit = self.V[reg];
+                        if digit > 0x0F {
+                            panic!("digit overflow");
+                        }
+                        self.I = 5 * (digit as u16);
+                    }
                     0x0055 => {
                         let end = (opcode & 0x0F00) >> 8;
                         for i in 0..end+1 {
