@@ -35,7 +35,6 @@ let picture = [
 ]
 
 let chip = wasm.Chip.new();
-
 chip.load_instructions(picture)
 
 while (chip.pc - 0x200 < picture.length * 2) {
