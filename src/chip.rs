@@ -1,6 +1,14 @@
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use js_sys::Array;
+use rand::prelude::*;
+use rand::Rng;
+
+#[wasm_bindgen]
+extern {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
 
 #[wasm_bindgen]
 pub struct Chip {
@@ -12,7 +20,7 @@ pub struct Chip {
     pub I: u16,
     pub pc: usize,
 
-    gfx: [bool; 64*32],
+    gfx: [u64; 32],
 
     delay_timer: u8,
     sound_timer: u8,
@@ -37,7 +45,7 @@ impl Chip {
             V: [0; 16],
             I: 0,
             pc: 0x200,
-            gfx: [false; 64*32],
+            gfx: [0; 32],
             delay_timer: 0,
             sound_timer: 0,
             stack: [0; 16],
@@ -47,13 +55,13 @@ impl Chip {
 
     pub fn display_as_str(&self) -> String {
         let mut display_str = String::new();
-        
-        for i in 0..2048 {
-            if i % 64 == 0 {
-                display_str.push('\n');
+        let base: u64 = 2;
+        for i in 0..32 {
+            for j in 0..64 {
+                let pixel = self.gfx[i] & base.pow(63 - j);
+                display_str.push(if pixel != 0 { 'X' } else { '=' });
             }
-            let pixel = self.gfx[i];
-            display_str.push(if pixel { 'X' } else { '=' });
+            display_str.push('\n');
         }
         
         display_str
@@ -86,7 +94,6 @@ impl Chip {
     }
 }
 
-
 impl Chip {
     pub fn get_opcode(&self) -> u16 {
         let code = self.memory[self.pc] as u16;
@@ -108,7 +115,7 @@ impl Chip {
                 match opcode & 0x000F {
                     // CLS
                     0x0000 => {
-                        self.gfx = [false; 64*32]
+                        self.gfx = [0; 32]
                     },
                     // RET
                     0x000E => {
@@ -255,6 +262,25 @@ impl Chip {
                 let mut new_pc = (opcode & 0x0FFF) as usize;
                 new_pc += self.V[0] as usize;
                 self.pc = new_pc;
+            },
+            0xC000 => {
+                let (reg, value) = extract_reg_and_byte(opcode);
+                let random_byte = rand::random::<u8>();
+                self.V[reg] = value & random_byte;
+            },
+            0xD000 => {
+                let x = ((opcode & 0x0F00) >> 8) as usize;
+                let y = ((opcode & 0x00F0) >> 4) as usize;
+                let n = opcode & 0x000F;
+
+                let shift_amount = 64 - 8 - self.V[x];
+                log(&format!("{}", shift_amount));
+                for i in 0..n {
+                    let byte = (self.memory[(self.I+i) as usize] as u64) << shift_amount;
+                    //TODO flag if pixel off
+                    self.gfx[(self.V[y as usize] as usize) + (i as usize)] ^= byte;
+                }
+
             },
             0xF000 => {
                 match opcode & 0x00FF {

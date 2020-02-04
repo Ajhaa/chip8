@@ -1,5 +1,6 @@
 import * as wasm from "chip8-wasm";
 
+wasm.init_panic_hook()
 let fibonacci = [
   0x6501, // LD V5 1 ; add this to I (memory pointer) later
   0xA400, // LD I 0x400 ; set memory pointer to 0x400
@@ -23,14 +24,23 @@ let fibonacci = [
   0x120A, // JP 0x20A ; jump to the sixth instruction
 ];
 
+let picture = [
+  0x6205, // load x coordinate to register 2
+  0x6302, // load y coordinate to register 3
+  0xA400, // set memory pointer to 0x400
+  0x60FE, // load first part of sprite to register 0
+  0x6101, // load second part of sprite to register 1
+  0xF155, // load registers 0 and 1 into memory at memory pointer
+  0xD232, // display 2 byte sprite at coordinates V2, V3
+]
+
 let chip = wasm.Chip.new();
 
-chip.load_instructions(fibonacci)
+chip.load_instructions(picture)
 
-while (chip.pc - 0x200 < fibonacci.length * 2) {
+while (chip.pc - 0x200 < picture.length * 2) {
   chip.trigger_cycle();
 }
-
 
 for (const val of chip.mem_dump(0x400, 0x40A)) {
   console.log(val);
