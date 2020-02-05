@@ -286,6 +286,14 @@ impl Chip {
             },
             0xF000 => {
                 match opcode & 0x00FF {
+                    0x0007 => {
+                        let reg = ((opcode & 0x0F00) >> 8) as usize;
+                        self.V[reg] = self.delay_timer;
+                    },
+                    0x0015 => {
+                        let reg = ((opcode & 0x0F00) >> 8) as usize;
+                        self.delay_timer = self.V[reg];
+                    },
                     0x001E => {
                         let reg = ((opcode & 0x0F00) >> 8) as usize;
                         self.I += self.V[reg] as u16;

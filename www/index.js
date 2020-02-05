@@ -40,7 +40,19 @@ let letter = [
   0x6007, // Load value 0x0A to register 0
   0xF029, // Move I to digit pointed by register 0
   0xD235, // display 5 byte sprite at coordinates V2, V3
-]
+];
+
+let countUp = [
+  0x613C, // load delay timer (60) to register 1 
+  0x620F, // load x coordinate to register 2
+  0x6302, // load y coordinate to register 3
+  0x6000, // Load value 0x00 to register 0
+  0xF029, // Move I to digit pointed by register 0
+  0xF115, // load register 1 to delay timer
+  0xD235, // display 5 byte sprite at coordinates V2, V3
+  0XF407, // Load the value of delay timer to register 4
+  0x120C, // Jump to display line
+];
 
 let chip = wasm.Chip.new();
 chip.load_instructions(letter)
