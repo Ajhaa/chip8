@@ -43,7 +43,7 @@ let letter = [
 ];
 
 let countUp = [
-  0x6715, // load delay timer (20) to register 7 
+  0x673C, // load delay timer to register 7 
   0x6600, // Load value 0x00 to register 6
 
   0xF715, // load register 7 to delay timer
@@ -53,17 +53,17 @@ let countUp = [
   0x6902, // load y coordinate to register 9
 
   0xF029, // Move I to digit pointed by register 0
-  0xD895, // display 5 byte sprite at coordinates V2, V3
+  0xD895, // display 5 byte sprite at coordinates V8, V9
 
   0x7808, // add two to register 8 
 
   0xF129, // Move I to digit pointed by register 1
-  0xD895, // display 5 byte sprite at coordinates V2, V3
+  0xD895, // display 5 byte sprite at coordinates V8, V9
 
   0x7808, // add two to register 8 
 
   0xF229, // Move I to digit pointed by register 2
-  0xD895, // display 5 byte sprite at coordinates V2, V3
+  0xD895, // display 5 byte sprite at coordinates V8, V9
 
   0XF407, // Load the value of delay timer to register 4
   0x3400, // Skip next instruction if delay timer is 0
@@ -76,10 +76,6 @@ let countUp = [
   0x1204, // Jump to instruction 3
 ];
 
-let ikiloop = [
-  0x613C,
-  0x1200,
-]
 
 let canvas = document.getElementById("chip8-canvas");
 
@@ -87,7 +83,7 @@ let chip = wasm.Chip.new();
 chip.load_instructions(countUp)
 
 const wasmCycle = () => {
-  chip.trigger_cycle();
+  chip.cycle_until_draw();
   let display_string = chip.display_as_str();
 
   canvas.textContent = display_string;

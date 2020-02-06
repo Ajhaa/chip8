@@ -88,14 +88,23 @@ impl Chip {
         self.delay_countdown = Instant::now();
     }
 
-    pub fn trigger_cycle(&mut self) {
+    pub fn trigger_cycle(&mut self) -> u16 {
         if self.delay_countdown.elapsed().as_millis() > 1000 / 60 {
             if self.delay_timer > 0 {
                 self.delay_timer -= 1;
             }
             self.delay_countdown = Instant::now();
         }
-        self.cycle();
+        self.cycle()
+    }
+
+    pub fn cycle_until_draw(&mut self) {
+        loop {
+            let opcode = self.trigger_cycle();
+            if opcode == 0x00E0 || opcode & 0xF000 == 0xD000 {
+                return;
+            }
+        }
     }
 
     pub fn mem_dump(&self, start: usize, end: usize) -> Array {
@@ -123,7 +132,7 @@ impl Chip {
         }
     }
 
-    pub fn cycle(&mut self) {
+    pub fn cycle(&mut self) -> u16 {
         let opcode = self.get_opcode();
         match opcode & 0xF000 {
             0x0000 => {
@@ -136,7 +145,7 @@ impl Chip {
                     0x00EE => {
                         self.pc = self.stack[self.sp] as usize;
                         self.sp -= 1;
-                        return;
+                        return opcode;
                     },
                     _ => ()
                 }
@@ -145,7 +154,7 @@ impl Chip {
             0x1000 => {
                 let new_addr = (opcode & 0x0FFF) as usize;
                 self.pc = new_addr;
-                return;
+                return opcode;
             },
             // CALL addr
             0x2000 => {
@@ -155,7 +164,7 @@ impl Chip {
 
                 self.stack[self.sp] = self.pc as u16;
                 self.pc = new_pc;
-                return;
+                return opcode;
             },
             // SE Vx, byte
             0x3000 => {
@@ -351,6 +360,7 @@ impl Chip {
         }
 
         self.pc += 2;
+        return opcode;
     }
 
     fn init_digits(&mut self) {
