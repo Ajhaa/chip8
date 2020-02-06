@@ -5,6 +5,8 @@ use js_sys::Array;
 use rand::prelude::*;
 use rand::Rng;
 
+const TICK_RATE: i128 = (1_000_000_000 / 60);
+
 #[wasm_bindgen]
 extern {
     #[wasm_bindgen(js_namespace = console)]
@@ -29,6 +31,7 @@ pub struct Chip {
     stack: [u16; 16],
     pub sp: usize,
     delay_countdown: Instant,
+    delay_fix: i128,
 }
 
 fn extract_reg_and_byte(opcode: u16) -> (usize, u8) {
@@ -53,6 +56,7 @@ impl Chip {
             stack: [0; 16],
             sp: 0,
             delay_countdown: Instant::now(),
+            delay_fix: 0,
         };
         chip.init_digits();
         chip
@@ -89,11 +93,14 @@ impl Chip {
     }
 
     pub fn trigger_cycle(&mut self) -> u16 {
-        if self.delay_countdown.elapsed().as_millis() > 1000 / 60 {
+        let elapsed = self.delay_countdown.elapsed().as_nanos() as i128;
+        if elapsed > TICK_RATE - self.delay_fix {
+            self.delay_fix = elapsed - TICK_RATE;
             if self.delay_timer > 0 {
                 self.delay_timer -= 1;
             }
             self.delay_countdown = Instant::now();
+            return 0xFFFF
         }
         self.cycle()
     }
@@ -101,7 +108,7 @@ impl Chip {
     pub fn cycle_until_draw(&mut self) {
         loop {
             let opcode = self.trigger_cycle();
-            if opcode == 0x00E0 || opcode & 0xF000 == 0xD000 {
+            if opcode == 0x00E0 || opcode == 0xFFFF || opcode & 0xF000 == 0xD000 {
                 return;
             }
         }
