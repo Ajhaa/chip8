@@ -78,18 +78,36 @@ let countUp = [
 
 
 let canvas = document.getElementById("chip8-canvas");
+let ctx = canvas.getContext("2d");
 
 let chip = wasm.Chip.new();
 chip.load_instructions(countUp)
 
 const wasmCycle = () => {
   chip.cycle_until_draw();
-  let display_string = chip.display_as_str();
+  // let display_string = chip.display_as_str();
 
-  canvas.textContent = display_string;
+  //canvas.textContent = display_string;
+  drawCanvas(chip.display_as_str());
   requestAnimationFrame(wasmCycle);
-
 }
 
-wasmCycle()
+wasmCycle();
+
+function drawCanvas(displayString) {
+  let x = 0;
+  let y = 0;
+  ctx.fillRect(0, 0, 640, 320);
+  for (let char of displayString) {
+    if (char === "X") {
+      ctx.clearRect(x, y, 10, 10);
+    }
+    x += 10;
+    if (char === "\n") {
+      y += 10;
+      x = 0;
+    }
+  }
+
+}
 
