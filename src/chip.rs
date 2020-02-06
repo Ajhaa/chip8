@@ -319,12 +319,30 @@ impl Chip {
                             panic!("digit overflow");
                         }
                         self.I = 5 * (digit as u16);
-                    }
+                    },
+                    0x0033 => {
+                        let reg = ((opcode & 0x0F00) >> 8) as usize;
+                        let number = self.V[reg];
+
+                        let hundreds = number / 100;
+                        let tens = (number / 10) % 10;
+                        let ones = (number % 100) % 10;
+
+                        self.memory[self.I as usize] = hundreds;
+                        self.memory[(self.I + 1) as usize] = tens;
+                        self.memory[(self.I + 2) as usize] = ones;
+                    },
                     0x0055 => {
                         let end = (opcode & 0x0F00) >> 8;
                         for i in 0..end+1 {
                             self.memory[(self.I+i) as usize] = self.V[i as usize];
                         } 
+                    },
+                    0x0065 => {
+                        let end = (opcode & 0x0F00) >> 8;
+                        for i in 0..end+1 {
+                            self.V[i as usize] = self.memory[(self.I+i) as usize];
+                        }  
                     },
                     _ => ()
                 }

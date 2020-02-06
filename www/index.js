@@ -43,21 +43,37 @@ let letter = [
 ];
 
 let countUp = [
-  0x613C, // load delay timer (60) to register 1 
-  0x620F, // load x coordinate to register 2
-  0x6302, // load y coordinate to register 3
-  0x6000, // Load value 0x00 to register 0
+  0x6715, // load delay timer (20) to register 7 
+  0x6600, // Load value 0x00 to register 6
+
+  0xF715, // load register 7 to delay timer
+  0x00E0, // clear screen
+
+  0x680F, // load x coordinate to register 8
+  0x6902, // load y coordinate to register 9
 
   0xF029, // Move I to digit pointed by register 0
-  0xF115, // load register 1 to delay timer
-  0x00E0, // clear screen
-  0xD235, // display 5 byte sprite at coordinates V2, V3
+  0xD895, // display 5 byte sprite at coordinates V2, V3
+
+  0x7808, // add two to register 8 
+
+  0xF129, // Move I to digit pointed by register 1
+  0xD895, // display 5 byte sprite at coordinates V2, V3
+
+  0x7808, // add two to register 8 
+
+  0xF229, // Move I to digit pointed by register 2
+  0xD895, // display 5 byte sprite at coordinates V2, V3
+
   0XF407, // Load the value of delay timer to register 4
   0x3400, // Skip next instruction if delay timer is 0
-  0x1210, // Jump two lines back
+  0x121C, // Jump two lines back
 
-  0x7001, // Add 1 to register 0
-  0x1208, // Jump to instruction 5
+  0xA200, // Set I to 200
+  0x7601, // Add 1 to register 6
+  0xF633, // Load the decimal representation of V6 to memory
+  0xF265, // load the digits to registers 0-2
+  0x1204, // Jump to instruction 3
 ];
 
 let ikiloop = [
