@@ -1,5 +1,6 @@
 mod utils;
 mod chip;
+mod assembler;
 
 use wasm_bindgen::prelude::*;
 

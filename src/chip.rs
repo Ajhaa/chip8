@@ -1,4 +1,5 @@
 use wasm_bindgen::prelude::*;
+use wasm_timer::{Instant};
 use wasm_bindgen::JsValue;
 use js_sys::Array;
 use rand::prelude::*;
@@ -27,6 +28,7 @@ pub struct Chip {
 
     stack: [u16; 16],
     pub sp: usize,
+    delay_countdown: Instant,
 }
 
 fn extract_reg_and_byte(opcode: u16) -> (usize, u8) {
@@ -50,6 +52,7 @@ impl Chip {
             sound_timer: 0,
             stack: [0; 16],
             sp: 0,
+            delay_countdown: Instant::now(),
         };
         chip.init_digits();
         chip
@@ -81,7 +84,17 @@ impl Chip {
         }
     }
 
+    pub fn set_delay(&mut self) {
+        self.delay_countdown = Instant::now();
+    }
+
     pub fn trigger_cycle(&mut self) {
+        if self.delay_countdown.elapsed().as_millis() > 1000 / 60 {
+            if self.delay_timer > 0 {
+                self.delay_timer -= 1;
+            }
+            self.delay_countdown = Instant::now();
+        }
         self.cycle();
     }
 
@@ -114,13 +127,13 @@ impl Chip {
         let opcode = self.get_opcode();
         match opcode & 0xF000 {
             0x0000 => {
-                match opcode & 0x000F {
+                match opcode & 0x00FF {
                     // CLS
-                    0x0000 => {
+                    0x00E0 => {
                         self.gfx = [0; 32]
                     },
                     // RET
-                    0x000E => {
+                    0x00EE => {
                         self.pc = self.stack[self.sp] as usize;
                         self.sp -= 1;
                         return;
@@ -276,8 +289,8 @@ impl Chip {
                 let n = opcode & 0x000F;
 
                 let shift_amount = 64 - 8 - self.V[x];
-                log(&format!("{}", shift_amount));
                 for i in 0..n {
+                    //TODO rotate instead of overflow
                     let byte = (self.memory[(self.I+i) as usize] as u64) << shift_amount;
                     //TODO flag if pixel off
                     self.gfx[(self.V[y as usize] as usize) + (i as usize)] ^= byte;
